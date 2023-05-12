@@ -1,4 +1,6 @@
 import sqlite3
+from concurrent.futures import ThreadPoolExecutor
+
 import numpy as np
 import cv2
 
@@ -35,7 +37,7 @@ def find_tile_and_place_in_descrambled(tile: tuple):
     # place descrambled tile in descrambled image
     x_in_descrambled, y_in_descrambled = source[0] * TILE_SIZE, source[1] * TILE_SIZE
     descrambled_image[y_in_descrambled:y_in_descrambled + TILE_SIZE,
-                        x_in_descrambled:x_in_descrambled + TILE_SIZE] = tile_descrambled
+    x_in_descrambled:x_in_descrambled + TILE_SIZE] = tile_descrambled
 
 
 # connecting to db
@@ -56,5 +58,10 @@ descrambled_image = np.zeros((984, 984, 3),
 # for each tile, isolate, rotate and place it in the descrambled image
 for tile in all_tiles:
     find_tile_and_place_in_descrambled(tile=tile)
+
+# can be done also with multy threading
+# with ThreadPoolExecutor() as executor:
+#     for tile in all_tiles:
+#         executor.submit(find_tile_and_place_in_descrambled, tile)
 
 cv2.imwrite("Descrambled Image.jpg", descrambled_image)
