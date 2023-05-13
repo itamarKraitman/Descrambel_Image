@@ -40,28 +40,38 @@ def find_tile_and_place_in_descrambled(tile: tuple):
     x_in_descrambled:x_in_descrambled + TILE_SIZE] = tile_descrambled
 
 
-# connecting to db
-with sqlite3.connect("assignment.sqlite") as conn:
-    cursor = conn.cursor()
+def connect_to_database() -> list[tuple]:
+    """
+    connect to database and retrieve all tiles
+    :return: all tiles as list of tuples
+    """
+    # connecting to db
+    with sqlite3.connect("assignment.sqlite") as conn:
+        cursor = conn.cursor()
 
-    # retrieve a list of all the tiles, each tile represented as tuple (sX, sY, desX, dexY, rotation)
-    cursor.execute("SELECT * FROM transform")
-    all_tiles = cursor.fetchall()
+        # retrieve a list of all the tiles, each tile represented as tuple (sX, sY, desX, dexY, rotation)
+        cursor.execute("SELECT * FROM transform")
+        return cursor.fetchall()
 
-# read scrambled image
-scrambled_image = cv2.imread("assignment.jpg")
 
-# create a blank image with dimension 984*984 with 3 color channels (each pixel in RGB) to store the descrambled image
-descrambled_image = np.zeros((984, 984, 3),
-                             dtype=np.uint8)  # uint8 is the standard stat type used to represent a pixel (0,255)
+if __name__ == '__main__':
 
-# for each tile, isolate, rotate and place it in the descrambled image
-for tile in all_tiles:
-    find_tile_and_place_in_descrambled(tile=tile)
+    all_tiles = connect_to_database()
 
-# can be done also with multy threading
-# with ThreadPoolExecutor() as executor:
-#     for tile in all_tiles:
-#         executor.submit(find_tile_and_place_in_descrambled, tile)
+    # read scrambled image
+    scrambled_image = cv2.imread("assignment.jpg")
 
-cv2.imwrite("Descrambled Image.jpg", descrambled_image)
+    # create a blank image with dimension 984*984 with 3 color channels (each pixel in RGB) to store the descrambled image
+    descrambled_image = np.zeros((984, 984, 3),
+                                 dtype=np.uint8)  # uint8 is the standard stat type used to represent a pixel (0,255)
+
+    # for each tile, isolate, rotate and place it in the descrambled image
+    for tile in all_tiles:
+        find_tile_and_place_in_descrambled(tile=tile)
+
+    # can be done also with multy threading
+    # with ThreadPoolExecutor() as executor:
+    #     for tile in all_tiles:
+    #         executor.submit(find_tile_and_place_in_descrambled, tile)
+
+    cv2.imwrite("Descrambled Image.jpg", descrambled_image)
